@@ -11,8 +11,12 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
+find_package(Boost COMPONENTS system REQUIRED)
+find_package(Threads REQUIRED)
+
 add_executable(hls-service ${SOURCES})
 
-# target_link_libraries(HLS
-
-# )
+target_link_libraries(hls-service
+                        Threads::Threads
+                        Boost::system
+)

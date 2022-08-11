@@ -1,7 +1,7 @@
 #!/bin/bash
 
-pushd build
+pushd build > /dev/null
 
 ./hls-service
 
-popd
+popd > /dev/null
