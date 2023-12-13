@@ -14,7 +14,7 @@ file(GLOB SOURCES
 find_package(Boost COMPONENTS system filesystem container REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 add_executable(hls-service ${SOURCES})
 
