@@ -19,8 +19,9 @@ jobs:
 
       - name: 'Update packages'
         run: |
+          sudo add-apt-repository ppa:boost-latest/ppa
           sudo apt update
-          sudo apt install libboost-system-dev libboost-filesystem-dev libboost-container-dev ffmpeg -y
+          sudo apt install libboost-system-dev libboost-filesystem-dev libboost-container-dev libboost-json-dev ffmpeg -y
 
       - name: 'Build'
         run: ./build.sh
