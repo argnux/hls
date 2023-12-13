@@ -1,0 +1,44 @@
+name: 'Build and test'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: 'Ubuntu'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 'Update packages'
+        run: |
+          sudo apt update
+          sudo apt install libboost-system-dev libboost-filesystem-dev ffmpeg -y
+
+      - name: 'Build'
+        run: ./build.sh
+      
+      - name: 'Archive application'
+        run: cd build && tar -cvf hls-service.tar hls-service
+      
+      - name: 'Upload application'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: 'hls-service_${{github.run_number}}'
+          path: '${{github.workspace}}/build/hls-service.tar'
+    
+      - name: 'Test'
+        run: |
+          ./run.sh &
+          ./post_video.sh
+          ls build/
+          ls build/output/
+          ./clean_files.sh
+          ls build/
