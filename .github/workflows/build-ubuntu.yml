@@ -20,7 +20,7 @@ jobs:
       - name: 'Update packages'
         run: |
           sudo apt update
-          sudo apt install libboost-system-dev libboost-filesystem-dev ffmpeg -y
+          sudo apt install libboost-system-dev libboost-filesystem-dev libboost-container-dev ffmpeg -y
 
       - name: 'Build'
         run: ./build.sh
