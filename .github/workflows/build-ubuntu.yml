@@ -48,4 +48,4 @@ jobs:
         run: |
           ./clean_files.sh
           cd build
-          [ ! -d output ]
+          [ -d output ]
