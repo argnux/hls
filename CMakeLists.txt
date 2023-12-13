@@ -11,7 +11,7 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
-find_package(Boost COMPONENTS system filesystem container json REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(Threads REQUIRED)
 
 add_executable(hls-service ${SOURCES})
