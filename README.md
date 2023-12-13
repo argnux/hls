@@ -17,6 +17,7 @@ The server uses
   - Boost.Asio
   - Boost.Beast
   - Boost.Process
+  - Boost.Filesystem
 - FFmpeg
 
 ### Build and start

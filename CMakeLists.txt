@@ -14,11 +14,10 @@ file(GLOB SOURCES
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-
 add_executable(hls-service ${SOURCES})
 
-target_link_libraries(hls-service
-                        Threads::Threads
-                        ${Boost_LIBRARIES}
+target_link_libraries(hls-service PRIVATE
+    Threads::Threads
+    ${Boost_LIBRARIES}
 )
+target_include_directories(hls-service PRIVATE ${Boost_INCLUDE_DIRS})

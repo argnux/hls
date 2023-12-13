@@ -1,0 +1,59 @@
+name: 'Build and test'
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_app:
+        type: boolean
+        description: 'Upload application'
+        required: false
+        default: github.ref == 'refs/heads/master'
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: 'Ubuntu'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 'Update packages'
+        run: |
+          sudo add-apt-repository ppa:mhier/libboost-latest
+          sudo apt update
+          sudo apt install libboost-system1.81-dev libboost-filesystem1.81-dev ffmpeg -y
+
+      - name: 'Build'
+        run: ./build.sh
+
+      - name: 'Test posting video'
+        run: |
+          ./run.sh &
+          ./post_video.sh
+          cd build
+          [ -d output ]
+          cd output
+          [ -f output0.ts ] && [ -f output1.ts ] && [ -f output2.ts ] && [ -f output.m3u8 ]
+      
+      - name: 'Test cleaning video'
+        run: |
+          ./clean_files.sh
+          cd build
+          [ ! -d output ]
+
+      - name: 'Archive application'
+        if: github.event.inputs.upload_app == 'true'
+        run: cd build && tar -cvf hls-service.tar hls-service
+
+      - name: 'Upload application'
+        if: github.event.inputs.upload_app == 'true'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: 'hls-service_${{github.run_number}}'
+          path: '${{github.workspace}}/build/hls-service.tar'
