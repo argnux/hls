@@ -2,6 +2,12 @@ name: 'Build and test'
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_app:
+        type: boolean
+        description: 'Upload application'
+        required: false
+        default: github.ref == 'refs/heads/master'
   push:
     branches:
       - master
@@ -25,16 +31,7 @@ jobs:
 
       - name: 'Build'
         run: ./build.sh
-      
-      - name: 'Archive application'
-        run: cd build && tar -cvf hls-service.tar hls-service
-      
-      - name: 'Upload application'
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          name: 'hls-service_${{github.run_number}}'
-          path: '${{github.workspace}}/build/hls-service.tar'
-    
+
       - name: 'Test posting video'
         run: |
           ./run.sh &
@@ -48,4 +45,15 @@ jobs:
         run: |
           ./clean_files.sh
           cd build
-          [ -d output ]
+          [ ! -d output ]
+
+      - name: 'Archive application'
+        if: github.event.inputs.upload_app == 'true'
+        run: cd build && tar -cvf hls-service.tar hls-service
+
+      - name: 'Upload application'
+        if: github.event.inputs.upload_app == 'true'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: 'hls-service_${{github.run_number}}'
+          path: '${{github.workspace}}/build/hls-service.tar'
