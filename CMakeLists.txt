@@ -11,7 +11,7 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost COMPONENTS system filesystem container REQUIRED)
 find_package(Threads REQUIRED)
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
