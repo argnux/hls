@@ -1,71 +1,77 @@
 #include "server.h"
 
-Server::Server(context_ptr cont)
-    : m_context(cont), m_sock(m_context->get_executor()), m_isStarted(false)
+#include <string>
+
+#include <boost/json/src.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/process/system.hpp>
+#include <boost/process/search_path.hpp>
+#include <boost/process/args.hpp>
+
+namespace json = boost::json;
+namespace fs = boost::filesystem;
+namespace bp = boost::process;
+
+const bp::filesystem::path ffmpeg = bp::search_path("ffmpeg");
+
+HTTPServer::HTTPServer(const tcp::endpoint& ep)
+    : context_{1}, acceptor_{context_, ep}
 {
 }
 
-void Server::start()
-{
-    m_isStarted = true;
-    do_read();
-}
-
-Server::server_ptr Server::new_(context_ptr cont)
-{
-    server_ptr ptr{new Server(cont)};
-    return ptr;
-}
-
-ip::tcp::socket& Server::sock()
-{
-    return m_sock;
-}
-
-void Server::stop()
-{
-    if (!m_isStarted)
-        return;
-    
-    m_isStarted = false;
-    m_sock.close();
-}
-
-void Server::on_read(const error_code& err, size_t bytes)
-{
-    if (!err) {
-        std::string msg(m_readBuf, bytes);
-        std::cout << "Message is '" << msg << "'" << std::endl; // FIXME remove logs
-        do_write(msg);
+int HTTPServer::exec() {
+    while (true) {
+        tcp::socket socket{context_};
+        acceptor_.accept(socket);
+        read(socket);
     }
-    stop();
+
+    return 0;
 }
 
-void Server::on_write(const error_code& err, size_t bytes)
-{
-    do_read();
-}
+void HTTPServer::read(tcp::socket& socket) {
+    http::read(socket, buffer_, request_, ec_);
 
-void Server::do_read()
-{
-    boost::asio::async_read(m_sock, boost::asio::buffer(m_readBuf),
-                            boost::bind(&Server::read_complete, shared_from_this(), _1, _2),
-                            boost::bind(&Server::on_read, shared_from_this(), _1, _2));
-}
-
-void Server::do_write(const std::string& msg)
-{
-    if (!m_isStarted)
+    if (ec_ == http::error::end_of_stream) {
         return;
-    std::copy(msg.begin(), msg.end(), m_writeBuf);
-    m_sock.async_write_some(boost::asio::buffer(m_writeBuf, msg.size()), boost::bind(&Server::on_write, shared_from_this(), _1, _2));
+    }
+
+    process_request(socket);
 }
 
-size_t Server::read_complete(const error_code& err, size_t bytes)
-{
-    if (err)
-        return 0;
+void HTTPServer::process_request(tcp::socket& socket) {
+    if (request_.method() == http::verb::post) {
+        if (request_.target() == "/upload") {
+            response_.version(11);   // HTTP/1.1
+            response_.result(http::status::ok);
+            response_.set(http::field::server, "Beast");
 
-	bool found = std::find(m_readBuf, m_readBuf + bytes, '\n') < m_readBuf + bytes;
-	return found ? 0 : 1;
+            fs::create_directory("output");
+            json::value parsed;
+            parsed = json::parse(request_.body());
+            std::string link = json::serialize(parsed.get_object().begin()->value());
+            boost::erase_all(link, "\"");
+            bp::system(ffmpeg, bp::args({"-i", link, "-b:v", "1M", "-g", "60", "-hls_time", "2", "-hls_list_size", "0", "output/output.m3u8"}));
+            
+            response_.body() = "Video playlist was placed in " + fs::current_path().string() + "/output" + '\n';
+            response_.prepare_payload();
+        } else if (request_.target() == "/clean") {
+            response_.version(11);   // HTTP/1.1
+            response_.result(http::status::ok);
+            response_.set(http::field::server, "Beast");
+
+            fs::remove_all("output");
+
+            response_.body() = "Output files were cleaned.\n";
+            response_.prepare_payload();
+        } else {
+            return;
+        }
+
+        write(socket);
+    }
+}
+
+void HTTPServer::write(tcp::socket& socket) {
+    http::write(socket, response_);
 }

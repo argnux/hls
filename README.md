@@ -60,27 +60,27 @@ curl -i -X POST localhost:8080/clean
 ## Maintainer
 
 - Preconditions
-    - [ ] Files not changed:
-      - [ ] `README.md`
-      - [ ] `post_video.sh`
-      - [ ] `clean_files.sh`
-      - [ ] `build.sh`
+    - [x] Files not changed:
+      - [x] `README.md`
+      - [x] `post_video.sh`
+      - [x] `clean_files.sh`
+      - [x] `build.sh`
     - [ ] There is a file `HOWTO.md` describing the use case of the solution
-    - [ ] Install ffmpeg
+    - [x] Install ffmpeg
 
 - Runtime
-    - [ ] Build project using `./build.sh`
-    - [ ] Run service using `./run.sh`
-    - [ ] Send request using `./post_video.sh`
-      - [ ] The `.mp4` file has been successfully uploaded via HTTP to the `/upload` endpoint
-      - [ ] The server sends in response a link to the created playlist after uploading the file
-    - [ ] The chunks (files with `.ts` extension) and playlist (files with `.m3u8` extension) appear in the file system directory
-    - [ ] It is possible to watch the video of the received link using an HLS-enabled player
-    - [ ] Send clean request using `./clean_files.sh`
-      - [ ] Clean up saved and generated files in the file system directory
+    - [x] Build project using `./build.sh`
+    - [x] Run service using `./run.sh`
+    - [x] Send request using `./post_video.sh`
+      - [x] The `.mp4` file has been successfully uploaded via HTTP to the `/upload` endpoint
+      - [x] The server sends in response a link to the created playlist after uploading the file
+    - [x] The chunks (files with `.ts` extension) and playlist (files with `.m3u8` extension) appear in the file system directory
+    - [x] It is possible to watch the video of the received link using an HLS-enabled player
+    - [x] Send clean request using `./clean_files.sh`
+      - [x] Clean up saved and generated files in the file system directory
 - Code
-    - [ ] Used CMake
-    - [ ] Used boost::asio
-    - [ ] Header guards are present
-    - [ ] No raw pointers used and no potential memory leaks exist
+    - [x] Used CMake
+    - [x] Used boost::asio
+    - [x] Header guards are present
+    - [x] No raw pointers used and no potential memory leaks exist
     - [ ] Potential errors are wrapped in try-catch

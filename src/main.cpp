@@ -1,9 +1,9 @@
-#include <iostream>
-#include "hls.h"
+#include "server.h"
 
 int main()
 {
-    ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8080);
-    HLS hls(ep);
-    return 0;
+    tcp::endpoint ep(boost::asio::ip::address::from_string("127.0.0.1"), 8080);
+    HTTPServer server{ep};
+
+    return server.exec();
 }
